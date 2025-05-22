@@ -1,4 +1,7 @@
+const API = 'http://localhost:4000/api';
 const app = document.getElementById("app");
+
+let userSession = null; // Guardamos usuario logueado
 
 // --- Login ---
 function renderLogin(error = "") {
@@ -84,55 +87,61 @@ function renderRegister(error = "") {
   document.getElementById("registerForm").onsubmit = handleRegister;
 }
 
-// --- Simulación usuarios en localStorage ---
-function getUsers() {
-  return JSON.parse(localStorage.getItem("taskmate_users") || "[]");
-}
-function setUsers(users) {
-  localStorage.setItem("taskmate_users", JSON.stringify(users));
-}
-function saveSession(email) {
-  localStorage.setItem("taskmate_session", email);
-}
-function getSession() {
-  return localStorage.getItem("taskmate_session");
-}
-function clearSession() {
-  localStorage.removeItem("taskmate_session");
-}
-
-// --- Registro y Login ---
-function handleRegister(e) {
+// --- Registro y Login API ---
+async function handleRegister(e) {
   e.preventDefault();
   const nombre = document.getElementById("reg-nombre").value.trim();
   const apellido = document.getElementById("reg-apellido").value.trim();
   const email = document.getElementById("reg-email").value.trim().toLowerCase();
   const pass = document.getElementById("reg-pass").value;
   const pass2 = document.getElementById("reg-pass2").value;
-  const users = getUsers();
   if (!nombre || !apellido) return renderRegister("Debes ingresar tu nombre y apellido.");
   if (!email.includes("@")) return renderRegister("El email no es válido.");
-  if (users.find(u => u.email === email)) return renderRegister("Este email ya está registrado.");
   if (pass.length < 5) return renderRegister("La contraseña debe tener al menos 5 caracteres.");
   if (pass !== pass2) return renderRegister("Las contraseñas no coinciden.");
-  users.push({ nombre, apellido, email, pass, tasks: [] });
-  setUsers(users);
-  renderLogin("¡Registro exitoso! Ahora puedes iniciar sesión.");
+
+  try {
+    const res = await fetch(`${API}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, apellido, email, pass })
+    });
+    if (res.ok) {
+      renderLogin("¡Registro exitoso! Ahora puedes iniciar sesión.");
+    } else {
+      const data = await res.json();
+      renderRegister(data.error || "Error en el registro");
+    }
+  } catch {
+    renderRegister("Error de red");
+  }
 }
-function handleLogin(e) {
+
+async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById("login-email").value.trim().toLowerCase();
   const pass = document.getElementById("login-pass").value;
-  const users = getUsers();
-  const user = users.find(u => u.email === email && u.pass === pass);
-  if (!user) {
-    return renderLogin("Email o contraseña incorrectos.");
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, pass })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      userSession = data.user; // { id, nombre, apellido, email }
+      renderTodo();
+    } else {
+      const data = await res.json();
+      renderLogin(data.error || "Error en el login");
+    }
+  } catch {
+    renderLogin("Error de red");
   }
-  saveSession(email);
-  renderTodo();
 }
+
 function handleLogout() {
-  clearSession();
+  userSession = null;
   renderLogin();
 }
 
@@ -152,19 +161,15 @@ function tiempoRelativo(fechaISO) {
 
 // --- Vista de tareas ---
 function renderTodo() {
-  const users = getUsers();
-  const email = getSession();
-  const user = users.find(u => u.email === email);
-  if (!user) return renderLogin();
-
+  if (!userSession) return renderLogin();
   app.innerHTML = `
     <nav class="menu-bar">
       <div class="menu-left">
         <span class="taskmate-logo"><span class="icon-circle-nav">✔</span> <b>TaskMate</b></span>
       </div>
       <div class="menu-right">
-        Hola, ${user.nombre || "Usuario"}
-        <div class="user-initial">${user.nombre ? user.nombre[0].toUpperCase() : "U"}</div>
+        Hola, ${userSession.nombre || "Usuario"}
+        <div class="user-initial">${userSession.nombre ? userSession.nombre[0].toUpperCase() : "U"}</div>
         <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
       </div>
     </nav>
@@ -173,55 +178,69 @@ function renderTodo() {
       <div class="todo-desc">Gestiona tus tareas diarias</div>
       <div class="add-task-box">
         <input type="text" id="task-input" placeholder="Agregar nueva tarea..." />
-        <button onclick="addTask()">Agregar</button>
+        <button id="add-task-btn">Agregar</button>
       </div>
       <ul class="task-list" id="task-list"></ul>
     </div>
   `;
-  showTasks(user.tasks);
+  loadTasks();
+  document.getElementById("add-task-btn").onclick = addTask;
+}
 
-  window.addTask = () => {
-    const input = document.getElementById("task-input");
-    const taskText = input.value.trim();
-    if (!taskText) return;
-    user.tasks.unshift({ text: taskText, completed: false, date: new Date().toISOString() });
-    setUsers(users);
-    input.value = "";
-    showTasks(user.tasks);
-  };
+async function loadTasks() {
+  if (!userSession) return;
+  try {
+    const res = await fetch(`${API}/tasks?userId=${encodeURIComponent(userSession.id)}`);
+    const tasks = await res.json();
+    showTasks(tasks);
+  } catch {
+    showTasks([]);
+  }
+}
 
-  window.handleLogout = handleLogout;
+async function addTask() {
+  const input = document.getElementById("task-input");
+  const taskText = input.value.trim();
+  if (!taskText) return;
+  await fetch(`${API}/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: userSession.id, text: taskText })
+  });
+  input.value = "";
+  loadTasks();
 }
 
 // Mostrar lista de tareas (eliminar y editar solo diseño)
 function showTasks(tasks) {
   const list = document.getElementById("task-list");
   list.innerHTML = "";
-  tasks.forEach((task, idx) => {
+  tasks.forEach((task) => {
     const li = document.createElement("li");
-    li.className = task.completed ? "completed" : "";
+    li.className = task.completada ? "completed" : "";
 
     // Checkbox para completar tarea
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "task-checkbox";
-    checkbox.checked = !!task.completed;
-    checkbox.onchange = () => {
-      const users = getUsers();
-      const user = users.find(u => u.email === getSession());
-      user.tasks[idx].completed = !user.tasks[idx].completed;
-      setUsers(users);
-      showTasks(user.tasks);
+    checkbox.checked = !!task.completada;
+    checkbox.onchange = async () => {
+      await fetch(`${API}/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userSession.id })
+      });
+      loadTasks();
     };
 
     // Texto tarea
     const span = document.createElement("span");
-    span.textContent = task.text;
+    span.textContent = task.texto;
 
     // Hora relativa
     const timeSpan = document.createElement("span");
     timeSpan.className = "task-time";
-    timeSpan.textContent = tiempoRelativo(task.date);
+    timeSpan.textContent = tiempoRelativo(task.fecha);
 
     // Botón modificar (solo diseño)
     const editBtn = document.createElement("button");
@@ -238,12 +257,13 @@ function showTasks(tasks) {
     delBtn.className = "delete-btn";
     delBtn.textContent = "✗";
     /* Funcionalidad comentada:
-    delBtn.onclick = () => {
-      const users = getUsers();
-      const user = users.find(u => u.email === getSession());
-      user.tasks.splice(idx, 1);
-      setUsers(users);
-      showTasks(user.tasks);
+    delBtn.onclick = async () => {
+      await fetch(`${API}/tasks/${task.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userSession.id })
+      });
+      loadTasks();
     };
     */
 
@@ -258,8 +278,4 @@ function showTasks(tasks) {
 }
 
 // Cargar vista inicial
-if (getSession()) {
-  renderTodo();
-} else {
-  renderLogin();
-}
+renderLogin();
