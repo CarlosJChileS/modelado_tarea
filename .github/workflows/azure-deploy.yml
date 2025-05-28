@@ -8,35 +8,38 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write      # ¡ESTO ES OBLIGATORIO PARA AZURE LOGIN!
+      contents: read
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.x'   # ¡Ahora igual que en tu App Service!
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
 
-    - name: Install dependencies
-      run: |
-        cd backend
-        npm install
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm install
 
-    - name: Zip backend
-      run: |
-        cd backend
-        zip -r ../app.zip .
+      - name: Zip backend
+        run: |
+          cd backend
+          zip -r ../app.zip .
 
-    - name: Login to Azure
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_780926E84599452099599970172DD70D }}
-        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82F5604F6DCD44C4AE06804F66C1FCE3 }}
-        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0569585AE403451FB013F4AB2A803BF7 }}
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_780926E84599452099599970172DD70D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82F5604F6DCD44C4AE06804F66C1FCE3 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9569585AE403451FB013F4AB2A803BF7 }}
 
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: taskmate   # Asegúrate que es el nombre real de tu App Service
-        package: ./app.zip
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: taskmate
+          package: ./app.zip
