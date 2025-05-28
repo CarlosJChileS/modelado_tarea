@@ -1,3 +1,11 @@
+# Docker Compose para PostgreSQL
+# Este archivo configura un contenedor de PostgreSQL con un volumen persistente
+# y un directorio para inicializar la base de datos con scripts SQL.
+# Asegúrate de tener Docker y Docker Compose instalados en tu máquina.
+# Puedes iniciar el contenedor ejecutando `docker-compose up -d` en la terminal.
+# Asegúrate de que el directorio `db` contenga tus scripts SQL para inicializar la base de datos.
+# Puedes detener el contenedor ejecutando `docker-compose down` en la terminal.
+# Este archivo es un ejemplo y puede ser modificado según tus necesidades.
 version: "3.9"
 services:
   db:
