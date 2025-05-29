@@ -1,7 +1,8 @@
 const API =
   window.location.hostname === "localhost"
     ? "http://localhost:4000/api"
-    : "/api";
+    : "https://taskmate-e5f5cedncgejhthw.brazilsouth-01.azurewebsites.net/api";
+
 
 // ---------- AUTH ----------
 export async function registerUser({ nombre, apellido, email, pass }) {
