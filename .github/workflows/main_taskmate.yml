@@ -23,9 +23,12 @@ jobs:
           cd backend
           npm install
 
+      - name: Check Docker version
+        run: docker --version
+
       - name: Run docker-compose (dev)
         run: |
-          docker-compose -f docker-compose.yml up -d
+          docker compose -f docker-compose.yml up -d
 
       # Zippea solo la carpeta backend (ya incluye frontend adentro)
       - name: Zip backend (con frontend adentro)
