@@ -192,7 +192,7 @@ async function showTasks() {
     const editBtn = document.createElement("button");
     editBtn.className = "edit-btn";
     editBtn.textContent = "✎";
-    /*
+    
     editBtn.onclick = async () => {
       const nuevoTexto = prompt("Editar tarea:", task.texto);
       if (nuevoTexto && nuevoTexto.trim() && nuevoTexto !== task.texto) {
@@ -200,18 +200,18 @@ async function showTasks() {
         showTasks();
       }
     };
-    */
+    
 
     // Eliminar (comentado)
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
     delBtn.textContent = "✗";
-    /*
+    
     delBtn.onclick = async () => {
       await deleteTask(task.id, userSession.id);
       showTasks();
     };
-    */
+  
 
     li.appendChild(checkbox);
     li.appendChild(span);

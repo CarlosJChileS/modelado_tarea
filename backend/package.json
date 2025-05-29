@@ -22,6 +22,7 @@
   "homepage": "https://github.com/CarlosJChileS/modelado_tarea#readme",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "pg": "^8.16.0"
