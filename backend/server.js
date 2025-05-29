@@ -15,16 +15,22 @@ app.use('/api', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 
 // --------- Servir archivos estáticos del frontend ---------
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+const frontendPath = path.resolve(__dirname, '..', 'frontend');
+app.use(express.static(frontendPath));
+
 // --------- Ruta raíz para servir index.html del frontend ---------
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send('No se encontró el frontend. Asegúrate de que la carpeta frontend esté incluida en el deploy.');
+    }
+  });
 });
 
 // --------- (Opcional) Catch-all para SPA (React/Vue/Angular) ---------
 // Si tu frontend es SPA y usas rutas del lado del cliente, descomenta este bloque:
 // app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../frontend/index.html'));
+//   res.sendFile(path.join(frontendPath, 'index.html'));
 // });
 
 const PORT = process.env.PORT || 4000;
