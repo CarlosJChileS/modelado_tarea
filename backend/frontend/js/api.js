@@ -1,4 +1,4 @@
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT ;
 const API = process.env.BASE_URL || `http://localhost:${PORT}/api`;
 
 // ---------- AUTH ----------
