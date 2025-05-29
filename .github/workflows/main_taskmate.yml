@@ -23,15 +23,13 @@ jobs:
           cd backend
           npm install
 
-      # Paso importante: regresa a la raíz antes de zippear
-      - name: Go to root
-        run: cd $GITHUB_WORKSPACE
-
-      - name: Zip backend y frontend
+      # Zippea solo la carpeta backend (ya incluye frontend adentro)
+      - name: Zip backend (con frontend adentro)
         run: |
-          zip -r app.zip backend frontend
+          cd backend
+          zip -r ../app.zip .
 
-      # Paso de debug para listar el contenido del zip
+      # Debug: lista el contenido del zip antes de deployar
       - name: Debug - Lista el contenido del zip
         run: |
           unzip -l app.zip

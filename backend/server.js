@@ -15,7 +15,7 @@ app.use('/api', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 
 // --------- Servir archivos estáticos del frontend ---------
-const frontendPath = path.resolve(__dirname, '..', 'frontend');
+const frontendPath = path.join(__dirname, 'frontend');
 app.use(express.static(frontendPath));
 
 // --------- Ruta raíz para servir index.html del frontend ---------
