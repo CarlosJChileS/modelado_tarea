@@ -1,5 +1,4 @@
-const PORT = process.env.PORT ;
-const API = process.env.BASE_URL || `http://localhost:${PORT}/api`;
+const API = `${window.location.origin}/api`;
 
 // ---------- AUTH ----------
 export async function registerUser({ nombre, apellido, email, pass }) {
