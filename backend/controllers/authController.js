@@ -33,7 +33,7 @@ exports.register = async (req, res) => {
 
     res.json({ user: insert.rows[0] });
   } catch (err) {
-    console.error(err);
+    console.error("Error en /register:", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error en el registro' });
   }
 };
@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
     delete user.pass;
     res.json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("Error en /login:", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error en el login' });
   }
 };

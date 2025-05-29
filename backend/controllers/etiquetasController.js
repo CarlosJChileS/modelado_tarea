@@ -6,6 +6,7 @@ exports.getEtiquetas = async (req, res) => {
     const q = await pool.query('SELECT * FROM etiquetas ORDER BY prioridad');
     res.json(q.rows);
   } catch (err) {
+    console.error("Error en /etiquetas (get):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al obtener etiquetas' });
   }
 };
@@ -22,6 +23,7 @@ exports.createEtiqueta = async (req, res) => {
     );
     res.json(q.rows[0]);
   } catch (err) {
+    console.error("Error en /etiquetas (create):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al crear etiqueta' });
   }
 };

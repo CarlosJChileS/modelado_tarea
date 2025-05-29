@@ -31,6 +31,7 @@ exports.getTasks = async (req, res) => {
     );
     res.json(q.rows);
   } catch (err) {
+    console.error("Error en /tasks (get):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al obtener tareas' });
   }
 };
@@ -63,6 +64,7 @@ exports.createTask = async (req, res) => {
 
     res.json(tarea);
   } catch (err) {
+    console.error("Error en /tasks (create):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al agregar tarea' });
   }
 };
@@ -84,6 +86,7 @@ exports.toggleTask = async (req, res) => {
       return res.status(404).json({ error: 'Tarea no encontrada o no autorizada' });
     res.json(q.rows[0]);
   } catch (err) {
+    console.error("Error en /tasks (toggle):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al actualizar tarea' });
   }
 };
@@ -105,6 +108,7 @@ exports.deleteTask = async (req, res) => {
       return res.status(404).json({ error: 'Tarea no encontrada o no autorizada' });
     res.json({ success: true });
   } catch (err) {
+    console.error("Error en /tasks (delete):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al eliminar tarea' });
   }
 };
@@ -145,6 +149,7 @@ exports.editTask = async (req, res) => {
 
     res.json(q.rows[0]);
   } catch (err) {
+    console.error("Error en /tasks (edit):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al editar tarea' });
   }
 };

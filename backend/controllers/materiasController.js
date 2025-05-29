@@ -13,6 +13,7 @@ exports.getMaterias = async (req, res) => {
     );
     res.json(q.rows);
   } catch (err) {
+    console.error("Error en /materias (get):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al obtener materias' });
   }
 };
@@ -29,6 +30,7 @@ exports.createMateria = async (req, res) => {
     );
     res.json(q.rows[0]);
   } catch (err) {
+    console.error("Error en /materias (create):", err); // MOSTRAR EL ERROR REAL
     res.status(500).json({ error: 'Error al crear materia' });
   }
 };
