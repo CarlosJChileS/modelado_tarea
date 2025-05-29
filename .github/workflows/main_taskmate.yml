@@ -23,13 +23,14 @@ jobs:
           cd backend
           npm install
 
+
+
       # Zippea solo la carpeta backend (ya incluye frontend adentro)
       - name: Zip backend (con frontend adentro)
         run: |
           cd backend
           zip -r ../app.zip .
 
-      # Debug: lista el contenido del zip antes de deployar
       - name: Debug - Lista el contenido del zip
         run: |
           unzip -l app.zip

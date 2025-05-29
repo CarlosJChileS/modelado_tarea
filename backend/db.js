@@ -8,5 +8,3 @@ const pool = new Pool({
 });
 
 module.exports = pool;
-// Este archivo configura la conexión a la base de datos PostgreSQL usando pg.
-// Asegúrate de que la variable de entorno DATABASE_URL esté configurada correctamente en tu entorno de producción.
