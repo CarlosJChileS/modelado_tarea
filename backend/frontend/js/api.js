@@ -1,8 +1,5 @@
-const API =
-  window.location.hostname === "localhost"
-    ? "http://localhost:4000/api"
-    : "https://taskmate-e5f5cedncgejhthw.brazilsouth-01.azurewebsites.net/api";
-
+const PORT = process.env.PORT || 4000;
+const API = process.env.BASE_URL || `http://localhost:${PORT}/api`;
 
 // ---------- AUTH ----------
 export async function registerUser({ nombre, apellido, email, pass }) {
