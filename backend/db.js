@@ -1,11 +1,12 @@
 const { Pool } = require('pg');
+require('dotenv').config(); 
 
 const pool = new Pool({
-  host: 'localhost', // Usa 'db' si tu backend corre en Docker junto con Postgres
-  port: 5432,
-  user: 'tareas_user',
-  password: 'tareas_password',
-  database: 'tareasdb'
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 module.exports = pool;
