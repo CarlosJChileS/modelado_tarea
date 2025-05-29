@@ -13,6 +13,8 @@ app.use(express.json());
 // --------- Rutas de la API ---------
 app.use('/api', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/etiquetas', require('./routes/etiquetas'));
+app.use('/api/materias', require('./routes/materias'));
 
 // --------- Servir archivos estáticos del frontend ---------
 const frontendPath = path.join(__dirname, 'frontend');

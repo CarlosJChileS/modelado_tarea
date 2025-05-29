@@ -1,7 +1,12 @@
-import { registerUser, loginUser, getTasks, createTask, toggleTask, deleteTask, editTask } from './api.js';
+import {
+  registerUser, loginUser, getTasks, createTask, toggleTask, deleteTask, editTask,
+  getMaterias, createMateria, getEtiquetas, createEtiqueta
+} from './api.js';
 
 const app = document.getElementById("app");
 let userSession = null;
+let materias = [];
+let etiquetas = [];
 
 // Utilidad para mostrar tiempos relativos
 function tiempoRelativo(fechaISO) {
@@ -58,6 +63,8 @@ function renderLogin(error = "") {
     const res = await loginUser({ email, pass });
     if (res.user) {
       userSession = res.user;
+      await cargarMateriasYRenderizar();
+      await cargarEtiquetasYRenderizar();
       renderTodo();
     } else {
       renderLogin(res.error || "Error en el login");
@@ -120,6 +127,15 @@ function renderRegister(error = "") {
   };
 }
 
+async function cargarMateriasYRenderizar() {
+  if (!userSession) return;
+  materias = await getMaterias(userSession.id);
+}
+
+async function cargarEtiquetasYRenderizar() {
+  etiquetas = await getEtiquetas();
+}
+
 // Render tareas
 function renderTodo() {
   if (!userSession) return renderLogin();
@@ -139,6 +155,13 @@ function renderTodo() {
       <div class="todo-desc">Gestiona tus tareas diarias</div>
       <div class="add-task-box">
         <input type="text" id="task-input" placeholder="Agregar nueva tarea..." />
+        <select id="select-materia">
+          <option value="">Materia (opcional)</option>
+          ${materias.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
+        </select>
+        <select id="select-etiquetas" multiple>
+          ${etiquetas.map(e => `<option value="${e.id}" style="color:${e.color}">${e.nombre} (${e.prioridad})</option>`).join('')}
+        </select>
         <button id="add-task-btn">Agregar</button>
       </div>
       <ul class="task-list" id="task-list"></ul>
@@ -151,8 +174,10 @@ function renderTodo() {
   document.getElementById("add-task-btn").onclick = async () => {
     const input = document.getElementById("task-input");
     const text = input.value.trim();
+    const materiaId = document.getElementById("select-materia").value || null;
+    const etiquetasSel = Array.from(document.getElementById("select-etiquetas").selectedOptions).map(opt => Number(opt.value));
     if (!text) return;
-    await createTask(userSession.id, text);
+    await createTask(userSession.id, text, materiaId, etiquetasSel);
     input.value = "";
     showTasks();
   };
@@ -183,35 +208,52 @@ async function showTasks() {
     const span = document.createElement("span");
     span.textContent = task.texto;
 
+    // Materia
+    if (task.materia) {
+      const materiaSpan = document.createElement("span");
+      materiaSpan.textContent = ` [${task.materia}] `;
+      materiaSpan.style.fontWeight = "bold";
+      li.appendChild(materiaSpan);
+    }
+
+    // Etiquetas
+    if (Array.isArray(task.etiquetas)) {
+      task.etiquetas.forEach(etq => {
+        if (etq && etq.nombre) {
+          const etqSpan = document.createElement("span");
+          etqSpan.textContent = `#${etq.nombre}`;
+          etqSpan.style.color = etq.color;
+          etqSpan.style.marginLeft = "7px";
+          li.appendChild(etqSpan);
+        }
+      });
+    }
+
     // Fecha
     const timeSpan = document.createElement("span");
     timeSpan.className = "task-time";
     timeSpan.textContent = tiempoRelativo(task.fecha);
 
-    // Editar (comentado)
+    // Editar
     const editBtn = document.createElement("button");
     editBtn.className = "edit-btn";
     editBtn.textContent = "✎";
-    
     editBtn.onclick = async () => {
       const nuevoTexto = prompt("Editar tarea:", task.texto);
       if (nuevoTexto && nuevoTexto.trim() && nuevoTexto !== task.texto) {
-        await editTask(task.id, userSession.id, nuevoTexto.trim());
+        await editTask(task.id, userSession.id, nuevoTexto.trim(), task.materia_id, (task.etiquetas || []).map(e => e.id));
         showTasks();
       }
     };
-    
 
-    // Eliminar (comentado)
+    // Eliminar
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
     delBtn.textContent = "✗";
-    
     delBtn.onclick = async () => {
       await deleteTask(task.id, userSession.id);
       showTasks();
     };
-  
 
     li.appendChild(checkbox);
     li.appendChild(span);
@@ -222,5 +264,9 @@ async function showTasks() {
   });
 }
 
-// Inicia la app en login
-renderLogin();
+// Inicialización
+(async function () {
+  await cargarMateriasYRenderizar();
+  await cargarEtiquetasYRenderizar();
+  renderLogin();
+})();

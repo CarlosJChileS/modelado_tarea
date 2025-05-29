@@ -1,5 +1,9 @@
-const API = 'http://localhost:4000/api';
+const API =
+  window.location.hostname === "localhost"
+    ? "http://localhost:4000/api"
+    : "/api";
 
+// ---------- AUTH ----------
 export async function registerUser({ nombre, apellido, email, pass }) {
   const res = await fetch(`${API}/register`, {
     method: "POST",
@@ -18,16 +22,17 @@ export async function loginUser({ email, pass }) {
   return res.json();
 }
 
+// ---------- TAREAS ----------
 export async function getTasks(userId) {
   const res = await fetch(`${API}/tasks?userId=${userId}`);
   return res.json();
 }
 
-export async function createTask(userId, text) {
+export async function createTask(userId, text, materiaId = null, etiquetas = []) {
   const res = await fetch(`${API}/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, text })
+    body: JSON.stringify({ userId, text, materiaId, etiquetas })
   });
   return res.json();
 }
@@ -50,11 +55,41 @@ export async function deleteTask(id, userId) {
   return res.json();
 }
 
-export async function editTask(id, userId, text) {
+export async function editTask(id, userId, text, materiaId = null, etiquetas = []) {
   const res = await fetch(`${API}/tasks/edit/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, text })
+    body: JSON.stringify({ userId, text, materiaId, etiquetas })
+  });
+  return res.json();
+}
+
+// ---------- MATERIAS ----------
+export async function getMaterias(userId) {
+  const res = await fetch(`${API}/materias?userId=${userId}`);
+  return res.json();
+}
+
+export async function createMateria(userId, nombre) {
+  const res = await fetch(`${API}/materias`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, nombre })
+  });
+  return res.json();
+}
+
+// ---------- ETIQUETAS ----------
+export async function getEtiquetas() {
+  const res = await fetch(`${API}/etiquetas`);
+  return res.json();
+}
+
+export async function createEtiqueta(nombre, color, prioridad) {
+  const res = await fetch(`${API}/etiquetas`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre, color, prioridad })
   });
   return res.json();
 }

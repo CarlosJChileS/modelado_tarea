@@ -1,15 +1,12 @@
 const bcrypt = require('bcrypt');
-const pool = require('../db'); 
+const pool = require('../db');
 
 function isEmailValid(email) {
-  // Regex básica para validar correo electrónico
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 exports.register = async (req, res) => {
   const { nombre, apellido, email, pass } = req.body;
-
-  // Validaciones básicas
   if (!nombre || !apellido || !email || !pass)
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
 
@@ -41,14 +38,13 @@ exports.register = async (req, res) => {
   }
 };
 
-
 exports.login = async (req, res) => {
   const { email, pass } = req.body;
 
   if (!email || !pass)
     return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  if (!isEmailValid(email))
     return res.status(400).json({ error: 'Correo electrónico inválido' });
 
   if (email.length > 100 || pass.length > 100)
@@ -64,14 +60,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Email o contraseña incorrectos' });
 
     const user = result.rows[0];
-
     const validPassword = await bcrypt.compare(pass, user.pass);
     if (!validPassword)
       return res.status(400).json({ error: 'Email o contraseña incorrectos' });
 
-    // Eliminar el hash antes de devolver los datos
     delete user.pass;
-
     res.json({ user });
   } catch (err) {
     console.error(err);
