@@ -15,11 +15,10 @@ app.use('/api', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 
 // --------- Servir archivos estáticos del frontend ---------
-app.use(express.static(path.join(__dirname, '../frontend')));
-
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 // --------- Ruta raíz para servir index.html del frontend ---------
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 // --------- (Opcional) Catch-all para SPA (React/Vue/Angular) ---------

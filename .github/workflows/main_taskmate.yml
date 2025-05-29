@@ -23,10 +23,10 @@ jobs:
           cd backend
           npm install
 
-      - name: Zip backend
+      - name: Zip backend y frontend
         run: |
-          cd backend
-          zip -r ../app.zip .
+          zip -r app.zip backend frontend
+
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
