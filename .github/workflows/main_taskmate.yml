@@ -8,9 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write      # ¡ESTO ES OBLIGATORIO PARA AZURE LOGIN!
-      contents: read
 
     steps:
       - name: Checkout code
@@ -31,15 +28,9 @@ jobs:
           cd backend
           zip -r ../app.zip .
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_780926E84599452099599970172DD70D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82F5604F6DCD44C4AE06804F66C1FCE3 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0569585AE403451FB013F4AB2A803BF7 }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: taskmate
+          app-name: taskmate       # Cambia si tu App Service tiene otro nombre
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./app.zip
