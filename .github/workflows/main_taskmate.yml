@@ -23,13 +23,16 @@ jobs:
           cd backend
           npm install
 
+      - name: Run docker-compose (dev)
+        run: |
+          docker-compose -f docker-compose.yml up -d
+
       # Zippea solo la carpeta backend (ya incluye frontend adentro)
       - name: Zip backend (con frontend adentro)
         run: |
           cd backend
           zip -r ../app.zip .
 
-      # Debug: lista el contenido del zip antes de deployar
       - name: Debug - Lista el contenido del zip
         run: |
           unzip -l app.zip
