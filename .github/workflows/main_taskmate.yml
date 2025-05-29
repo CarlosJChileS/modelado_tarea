@@ -23,9 +23,18 @@ jobs:
           cd backend
           npm install
 
+      # Paso importante: regresa a la raíz antes de zippear
+      - name: Go to root
+        run: cd $GITHUB_WORKSPACE
+
       - name: Zip backend y frontend
         run: |
           zip -r app.zip backend frontend
+
+      # Paso de debug para listar el contenido del zip
+      - name: Debug - Lista el contenido del zip
+        run: |
+          unzip -l app.zip
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
